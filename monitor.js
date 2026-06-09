@@ -46,6 +46,7 @@ async function run() {
               2. If no meaningful content, structural updates, or visual text changes occurred, respond with exactly: NO_CHANGES
               3. If genuine changes or updates are detected, provide a brief, bulleted summary of exactly what was modified or added. Keep it concise enough to fit nicely on a phone notification lock screen.
               4. Look specifically for image and link changes, we are looking specifically for catalog changes in inventory that get put up by company before they should. We want to see these mistakes so we know what is coming out soon for new products.
+              5. Include a direct link to the web page to open within the pushover app for https://learn.thewoobles.com
               
               OLD HTML SOURCE:
               ${previousHtml.substring(0, 50000)}
