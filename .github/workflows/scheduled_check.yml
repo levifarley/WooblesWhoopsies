@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read # No longer needs write permissions!
+  contents: read # No longer needs write permissions, completely safe from 403/128 errors!
 
 jobs:
   monitor:
@@ -28,7 +28,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: last_known_state.txt
-        key: website-state-${{ github.run_id }} # Generates a rolling key step
+        key: website-state-${{ github.run_id }}
         restore-keys: |
           website-state-
 
