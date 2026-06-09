@@ -1,14 +1,19 @@
-name: Twice Daily Website Monitor (Arizona Time)
+name: Frequent Website Monitor (Arizona Time)
 
 on:
   schedule:
-    # 01:00 UTC corresponds to 6:00 PM Arizona Time
-    # 16:00 UTC corresponds to 9:00 AM Arizona Time
-    - cron: '0 1,16 * * *'
-  workflow_dispatch:
+    # Rule 1: Covers the daytime runs (16:00, 19:00, 22:00 UTC) 
+    # This matches 9:00 AM, 12:00 PM, and 3:00 PM Arizona time
+    - cron: '0 16,19,22 * * *'
+    
+    # Rule 2: Covers the evening runs (01:00, 04:00 UTC)
+    # This matches 6:00 PM and 9:00 PM Arizona time
+    - cron: '0 1,4 * * *'
+    
+  workflow_dispatch: # Keeps the manual test button active
 
 permissions:
-  contents: read # No longer needs write permissions, completely safe from 403/128 errors!
+  contents: read
 
 jobs:
   monitor:
