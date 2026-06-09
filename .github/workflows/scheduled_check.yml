@@ -5,23 +5,32 @@ on:
     # 01:00 UTC corresponds to 6:00 PM Arizona Time
     # 16:00 UTC corresponds to 9:00 AM Arizona Time
     - cron: '0 1,16 * * *'
-  workflow_dispatch: # Enables a manual execution button in the GitHub UI for easy debugging
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read # No longer needs write permissions!
 
 jobs:
   monitor:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Code Baseline
+    - name: Checkout Code
       uses: actions/checkout@v4
 
     - name: Initialize Node.js Environment
       uses: actions/setup-node@v4
       with:
         node-version: '20'
+
+    - name: Restore Website Cache State
+      id: cache-state
+      uses: actions/cache@v4
+      with:
+        path: last_known_state.txt
+        key: website-state-${{ github.run_id }} # Generates a rolling key step
+        restore-keys: |
+          website-state-
 
     - name: Install Runtime Dependencies
       run: npm install @google/genai node-fetch
@@ -33,11 +42,8 @@ jobs:
         PUSHOVER_TOKEN: ${{ secrets.PUSHOVER_TOKEN }}
       run: node monitor.js
 
-    - name: Commit and Push Updated State Cache
-      run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git add last_known_state.txt
-        git commit -m "Update cache baseline state [skip ci]" || exit 0
-        git pull --rebase origin main
-        git push
+    - name: Save Updated Website Cache State
+      uses: actions/cache/save@v4
+      with:
+        path: last_known_state.txt
+        key: website-state-${{ github.run_id }}
