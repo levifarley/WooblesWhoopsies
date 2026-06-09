@@ -6,7 +6,7 @@ import fetch from 'node-fetch';
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 async function run() {
-  const targetUrl = 'https://example.com'; // <-- CHANGE THIS to the website you want to track
+  const targetUrl = 'https://learn.thewoobles.com'; // <-- CHANGE THIS to the website you want to track
   const cacheFile = 'last_known_state.txt';
 
   try {
@@ -45,6 +45,7 @@ async function run() {
               1. Disregard ephemeral changes like random session IDs, CSRF tokens, dynamic timestamps, or ad tracking scripts.
               2. If no meaningful content, structural updates, or visual text changes occurred, respond with exactly: NO_CHANGES
               3. If genuine changes or updates are detected, provide a brief, bulleted summary of exactly what was modified or added. Keep it concise enough to fit nicely on a phone notification lock screen.
+              4. Look specifically for image and link changes, we are looking specifically for catalog changes in inventory that get put up by company before they should. We want to see these mistakes so we know what is coming out soon for new products.
               
               OLD HTML SOURCE:
               ${previousHtml.substring(0, 50000)}
@@ -75,7 +76,7 @@ async function run() {
         body: JSON.stringify({
           token: process.env.PUSHOVER_TOKEN,
           user: process.env.PUSHOVER_USER_KEY,
-          title: '🚨 Website Update Detected!',
+          title: '🚨 Woobles Update Detected!',
           message: report
         })
       });
