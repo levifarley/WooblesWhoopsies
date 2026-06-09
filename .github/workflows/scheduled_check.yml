@@ -7,6 +7,9 @@ on:
     - cron: '0 1,16 * * *'
   workflow_dispatch: # Enables a manual execution button in the GitHub UI for easy debugging
 
+permissions:
+  contents: write
+
 jobs:
   monitor:
     runs-on: ubuntu-latest
