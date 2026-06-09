@@ -39,14 +39,5 @@ jobs:
         git config --local user.name "GitHub Action"
         git add last_known_state.txt
         git commit -m "Update cache baseline state [skip ci]" || exit 0
-        git push
-
-    - name: Commit and Push Updated State Cache
-      run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git add last_known_state.txt
-        git commit -m "Update cache baseline state [skip ci]" || exit 0
-        # 👇 ADD THIS LINE to merge any simultaneous repository updates cleanly
         git pull --rebase origin main
         git push
