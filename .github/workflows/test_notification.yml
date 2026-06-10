@@ -1,0 +1,33 @@
+name: 🚨 Trigger Test Notification
+
+on:
+  workflow_dispatch: # Manual button activation only (no cron schedule)
+
+permissions:
+  contents: read
+
+jobs:
+  run-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Initialize Node.js Environment
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install Runtime Dependencies
+      run: npm install @google/genai node-fetch
+
+    - name: Execute Monitor with Empty Cache Override
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        PUSHOVER_USER_KEY: ${{ secrets.PUSHOVER_USER_KEY }}
+        PUSHOVER_TOKEN: ${{ secrets.PUSHOVER_TOKEN }}
+      run: |
+        # Force create a fake baseline right before running the script
+        echo "FORCE_TEST_RESET_BASELINE" > last_known_state.txt
+        node monitor.js
