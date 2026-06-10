@@ -29,7 +29,7 @@ async function run() {
       return;
     }
 
-    console.log("Analyzing content changes with Gemini...");
+   console.log("Analyzing content changes with Gemini...");
 
     // 3. Prompt Gemini to clean out the noise and identify real changes
     const responseAi = await ai.models.generateContent({
@@ -39,19 +39,28 @@ async function run() {
           role: 'user',
           parts: [
             {
-              text: `You are an automated web tracking assistant. Compare the old HTML source and the new HTML source of a website.
+              text: `You are an automated backend data parser. Your sole job is to compare two raw string inputs representing website states and output the differences. Do not talk to me or ask follow-up questions.
               
-              Task:
+              Task Instructions:
               1. Disregard ephemeral changes like random session IDs, CSRF tokens, dynamic timestamps, or ad tracking scripts.
-              2. If no meaningful content, structural updates, or visual text changes occurred, respond with exactly: NO_CHANGES
-              3. If genuine changes or updates are detected, provide a brief, bulleted summary of exactly what was modified or added. Keep it concise enough to fit nicely on a phone notification lock screen.
-              4. Look specifically for new image source links, text modifications, and catalog item links. We are watching for newly uploaded catalog updates or unreleased inventory listings.`
+              2. If the Old State is a placeholder (like "Empty", "RESET", etc.) or if there are no meaningful content, structural, or visual inventory changes, respond with exactly: NO_CHANGES
+              3. If genuine changes, text modifications, or new product catalog links are detected, provide a brief, bulleted summary of exactly what was modified or added. Keep it concise enough to fit nicely on a mobile notification lock screen.
+              4. Look specifically for new image source links, text modifications, and catalog item links to detect unreleased inventory listings.
+              
+              OLD STATE RECORD:
+              \`\`\`html
+              ${previousHtml.substring(0, 50000)}
+              \`\`\`
+              
+              NEW HTML SOURCE TO EVALUATE:
+              \`\`\`html
+              ${currentHtml.substring(0, 50000)}
+              \`\`\`工作`
             }
           ]
         }
       ]
     });
-
     const report = responseAi.text.trim();
 
     // 4. Act on the model's response
