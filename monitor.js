@@ -5,6 +5,9 @@ import fetch from 'node-fetch';
 // 1. Initialize the Gemini API client
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
+// Helper function to handle pausing/waiting
+const delay = ms => new Promise(res => setTimeout(res, ms));
+
 async function run() {
   const targetUrl = 'https://learn.thewoobles.com'; 
   const cacheFile = 'last_known_state.txt';
@@ -29,11 +32,10 @@ async function run() {
       return;
     }
 
-   console.log("Analyzing content changes with Gemini...");
+    console.log("Analyzing content changes with Gemini...");
 
-    // 3. Prompt Gemini to clean out the noise and identify real changes
-    const responseAi = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+    // Unified prompt configuration
+    const promptPayload = {
       contents: [
         {
           role: 'user',
@@ -55,12 +57,31 @@ async function run() {
               NEW HTML SOURCE TO EVALUATE:
               \`\`\`html
               ${currentHtml.substring(0, 50000)}
-              \`\`\`工作`
+              \`\`\``
             }
           ]
         }
       ]
-    });
+    };
+
+    let responseAi;
+    
+    // 3. Resilient API Execution Block with Fallback Strategy
+    try {
+      // Primary Attempt
+      responseAi = await ai.models.generateContent({ model: 'gemini-2.5-flash', ...promptPayload });
+    } catch (primaryError) {
+      if (primaryError.status === 503 || primaryError.status === 429) {
+        console.warn("Primary model (2.5-flash) overloaded. Pausing 5s and retrying with fallback model...");
+        await delay(5000);
+        
+        // Secondary Backup Attempt using a variant engine pool
+        responseAi = await ai.models.generateContent({ model: 'gemini-2.0-flash', ...promptPayload });
+      } else {
+        throw primaryError; // Re-throw if it's a structural error like an invalid API Key
+      }
+    }
+
     const report = responseAi.text.trim();
 
     // 4. Act on the model's response
@@ -81,8 +102,8 @@ async function run() {
           user: process.env.PUSHOVER_USER_KEY,
           title: '🚨 New Woobles Drop/Update Found!',
           message: report,
-          url: targetUrl,                // 🌟 NATIVE LINK FIELD
-          url_title: 'Open Woobles Learn' // 🌟 LINK BUTTON TEXT
+          url: targetUrl,
+          url_title: 'Open Woobles Learn'
         })
       });
 
