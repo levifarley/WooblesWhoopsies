@@ -5,7 +5,7 @@ import fetch from 'node-fetch';
 // 1. Initialize the Gemini API client
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-// Helper function to handle pausing/waiting
+// Helper function to handle pausing/waiting during retries
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
 async function run() {
@@ -34,7 +34,7 @@ async function run() {
 
     console.log("Analyzing content changes with Gemini...");
 
-    // Unified prompt configuration
+    // Structural prompt payload with Markdown boundaries to prevent conversational confusion
     const promptPayload = {
       contents: [
         {
@@ -65,20 +65,29 @@ async function run() {
     };
 
     let responseAi;
-    
-    // 3. Resilient API Execution Block with Fallback Strategy
-    try {
-      // Primary Attempt
-      responseAi = await ai.models.generateContent({ model: 'gemini-2.5-flash', ...promptPayload });
-    } catch (primaryError) {
-      if (primaryError.status === 503 || primaryError.status === 429) {
-        console.warn("Primary model (2.5-flash) overloaded. Pausing 5s and retrying with fallback model...");
-        await delay(5000);
+    let attempts = 0;
+    const maxAttempts = 3;
+
+    // 3. Resilient Free-Tier API Execution Block
+    while (attempts < maxAttempts) {
+      try {
+        attempts++;
+        if (attempts > 1) {
+          console.log(`Gemini API Call - Retry Attempt ${attempts} of ${maxAttempts}...`);
+        }
         
-        // Secondary Backup Attempt using a variant engine pool
-        responseAi = await ai.models.generateContent({ model: 'gemini-2.0-flash', ...promptPayload });
-      } else {
-        throw primaryError; // Re-throw if it's a structural error like an invalid API Key
+        responseAi = await ai.models.generateContent({ model: 'gemini-2.5-flash', ...promptPayload });
+        break; // Success! Break out of the retry loop.
+      } catch (error) {
+        // If it encounters a Server Load (503) or temporary Free Tier Overload (429)
+        if ((error.status === 503 || error.status === 429) && attempts < maxAttempts) {
+          const waitTime = attempts * 30000; // Waits 30s on first fail, 60s on second fail
+          console.warn(`Gemini throttled or busy (Status ${error.status}). Pausing for ${waitTime / 1000}s before retrying primary model...`);
+          await delay(waitTime);
+        } else {
+          // Re-throw the error if it's structural (like an invalid API Key) or if we maxed out retries
+          throw error;
+        }
       }
     }
 
