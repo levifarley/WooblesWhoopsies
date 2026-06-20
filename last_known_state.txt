@@ -1,1 +1,142 @@
-RESET
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Google Tag Manager will be loaded dynamically based on environment -->
+    <!-- Google tag (gtag.js) -->
+    <!-- <script async src="https://www.googletagmanager.com/gtag/js?id=G-Q9STB3K8YN"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag('js', new Date());
+      gtag('config', 'G-Q9STB3K8YN');
+    </script> -->
+    <!-- End Google Tag Manager -->
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+    <!--320-->
+    <!-- <link rel="icon" href="/favicon.png" /> -->
+    <!-- <title>shortcake</title> -->
+    <title>Step-by-Step Guides for Your Crochet Kit | The Woobles</title>
+    <meta
+      name="description"
+      content="Unlock our step-by-step guides and video tutorials with the password on the card in your crochet amigurumi kit, and find everything you need to know about how to make adorable plushies."
+    />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@latest/css/materialdesignicons.min.css" />
+    <script
+      async
+      type="text/javascript"
+      src="https://static.klaviyo.com/onsite/js/klaviyo.js?company_id=UrQS2n"
+    ></script>
+    <script>
+      (function (h, o, t, j, a, r) {
+        h.hj =
+          h.hj ||
+          function () {
+            (h.hj.q = h.hj.q || []).push(arguments);
+          };
+        h._hjSettings = { hjid: 3236476, hjsv: 6 };
+        a = o.getElementsByTagName('head')[0];
+        r = o.createElement('script');
+        r.async = 1;
+        r.src = t + h._hjSettings.hjid + j + h._hjSettings.hjsv;
+        a.appendChild(r);
+      })(window, document, 'https://static.hotjar.com/c/hotjar-', '.js?sv=');
+    </script>
+    <script>
+      !(function (w, d, t) {
+        w.TiktokAnalyticsObject = t;
+        var ttq = (w[t] = w[t] || []);
+        (ttq.methods = [
+          'page',
+          'track',
+          'identify',
+          'instances',
+          'debug',
+          'on',
+          'off',
+          'once',
+          'ready',
+          'alias',
+          'group',
+          'enableCookie',
+          'disableCookie',
+        ]),
+          (ttq.setAndDefer = function (t, e) {
+            t[e] = function () {
+              t.push([e].concat(Array.prototype.slice.call(arguments, 0)));
+            };
+          });
+        for (var i = 0; i < ttq.methods.length; i++) ttq.setAndDefer(ttq, ttq.methods[i]);
+        (ttq.instance = function (t) {
+          for (var e = ttq._i[t] || [], n = 0; n < ttq.methods.length; n++) ttq.setAndDefer(e, ttq.methods[n]);
+          return e;
+        }),
+          (ttq.load = function (e, n) {
+            var i = 'https://analytics.tiktok.com/i18n/pixel/events.js';
+            (ttq._i = ttq._i || {}),
+              (ttq._i[e] = []),
+              (ttq._i[e]._u = i),
+              (ttq._t = ttq._t || {}),
+              (ttq._t[e] = +new Date()),
+              (ttq._o = ttq._o || {}),
+              (ttq._o[e] = n || {});
+            n = document.createElement('script');
+            (n.type = 'text/javascript'), (n.async = !0), (n.src = i + '?sdkid=' + e + '&lib=' + t);
+            e = document.getElementsByTagName('script')[0];
+            e.parentNode.insertBefore(n, e);
+          });
+
+        ttq.load('C91L4NB3NCHNQFBBFVJ0');
+        ttq.page();
+      })(window, document, 'ttq');
+    </script>
+    <script>
+      !(function (f, b, e, v, n, t, s) {
+        if (f.fbq) return;
+        n = f.fbq = function () {
+          n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+        };
+        if (!f._fbq) f._fbq = n;
+        n.push = n;
+        n.loaded = !0;
+        n.version = '2.0';
+        n.queue = [];
+        t = b.createElement(e);
+        t.async = !0;
+        t.src = v;
+        s = b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t, s);
+      })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init', '2526738330931052');
+      fbq('track', 'PageView');
+    </script>
+    <noscript
+      ><img
+        height="1"
+        width="1"
+        style="display: none"
+        src="https://www.facebook.com/tr?id=1367390894007415&ev=PageView&noscript=1"
+    /></noscript>
+    <script
+      type="text/javascript"
+      src="https://app.termly.io/embed.min.js"
+      data-auto-block="on"
+      data-website-uuid="c044b768-61ad-4f70-aea3-bbde438feedb"
+    ></script>
+  <script defer type="module" src="/js/chunk-vendors.82b35f95.js"></script><script defer type="module" src="/js/app.d1950d23.js"></script><script defer src="/js/chunk-vendors.e079b42a.js" nomodule></script><script defer src="/js/app.24139be3.js" nomodule></script></head>
+  <body>
+    <!-- Google Tag Manager noscript will be loaded dynamically based on environment -->
+    <noscript>
+      <strong
+        >We're sorry but shortcake doesn't work properly without JavaScript enabled. Please
+        enable it to continue.</strong
+      >
+    </noscript>
+    <div id="app"></div>
+    <!-- built files will be auto injected -->
+  </body>
+</html>
