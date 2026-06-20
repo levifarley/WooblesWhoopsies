@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write # Grants permission to push the file updates back to the repo
 
 jobs:
   monitor:
@@ -18,18 +18,13 @@ jobs:
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # Fetches full history so git rebase works perfectly
 
     - name: Initialize Node.js Environment
       uses: actions/setup-node@v4
       with:
         node-version: '20'
-
-    - name: Download Previous Website State
-      uses: actions/download-artifact@v4
-      with:
-        name: website-baseline-file
-        path: .
-      continue-on-error: true # Safe fallback for the very first run when no artifact exists yet
 
     - name: Install Runtime Dependencies
       run: npm install @google/genai node-fetch
@@ -41,10 +36,17 @@ jobs:
         PUSHOVER_TOKEN: ${{ secrets.PUSHOVER_TOKEN }}
       run: node monitor.js
 
-    - name: Upload New Website State
-      uses: actions/upload-artifact@v4
-      with:
-        name: website-baseline-file
-        path: last_known_state.txt
-        retention-days: 3 # Keeps storage clean automatically
-        overwrite: true   # Forces GitHub to completely replace the file with the newest version
+    - name: Commit and Push Updated State Cache
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add last_known_state.txt
+        
+        # Only commit and push if the file actually changed
+        if ! git diff --cached --quiet; then
+          git commit -m "Update cache baseline state [skip ci]"
+          git pull --rebase origin main
+          git push origin main
+        else
+          echo "No internal file changes detected. Skipping repository commit."
+        fi
