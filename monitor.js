@@ -4,8 +4,6 @@ import fetch from 'node-fetch';
 
 // 1. Initialize the Gemini API client
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
-// Helper function to handle pausing/waiting during retries
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
 async function run() {
@@ -23,18 +21,17 @@ async function run() {
       previousHtml = fs.readFileSync(cacheFile, 'utf8');
     }
 
-    // Cache current state immediately for the next scheduled run
+    // Cache current state immediately to disk for the repo update
     fs.writeFileSync(cacheFile, currentHtml, 'utf8');
 
-    // If there is no baseline cache, save it and exit early
-    if (!previousHtml) {
-      console.log("No baseline state found. Saving current HTML as baseline for the next run.");
+    // If there is no baseline cache or it's a reset state, skip Gemini and save it
+    if (!previousHtml || previousHtml.trim() === "RESET" || previousHtml.trim() === "Empty") {
+      console.log("No baseline state found on disk. Baseline initialized. Exiting until next schedule.");
       return;
     }
 
     console.log("Analyzing content changes with Gemini...");
 
-    // Structural prompt payload with Markdown boundaries to prevent conversational confusion
     const promptPayload = {
       contents: [
         {
@@ -45,7 +42,7 @@ async function run() {
               
               Task Instructions:
               1. Disregard ephemeral changes like random session IDs, CSRF tokens, dynamic timestamps, or ad tracking scripts.
-              2. If the Old State is a placeholder (like "Empty", "RESET", etc.) or if there are no meaningful content, structural, or visual inventory changes, respond with exactly: NO_CHANGES
+              2. If the Old State is a placeholder or if there are no meaningful content, structural, or visual inventory changes, respond with exactly: NO_CHANGES
               3. If genuine changes, text modifications, or new product catalog links are detected, provide a brief, bulleted summary of exactly what was modified or added. Keep it concise enough to fit nicely on a mobile notification lock screen.
               4. Look specifically for new image source links, text modifications, and catalog item links to detect unreleased inventory listings.
               
@@ -68,24 +65,17 @@ async function run() {
     let attempts = 0;
     const maxAttempts = 3;
 
-    // 3. Resilient Free-Tier API Execution Block
     while (attempts < maxAttempts) {
       try {
         attempts++;
-        if (attempts > 1) {
-          console.log(`Gemini API Call - Retry Attempt ${attempts} of ${maxAttempts}...`);
-        }
-        
         responseAi = await ai.models.generateContent({ model: 'gemini-2.5-flash', ...promptPayload });
-        break; // Success! Break out of the retry loop.
+        break; 
       } catch (error) {
-        // If it encounters a Server Load (503) or temporary Free Tier Overload (429)
         if ((error.status === 503 || error.status === 429) && attempts < maxAttempts) {
-          const waitTime = attempts * 30000; // Waits 30s on first fail, 60s on second fail
-          console.warn(`Gemini throttled or busy (Status ${error.status}). Pausing for ${waitTime / 1000}s before retrying primary model...`);
+          const waitTime = attempts * 30000;
+          console.warn(`Gemini busy (Status ${error.status}). Retrying in ${waitTime / 1000}s...`);
           await delay(waitTime);
         } else {
-          // Re-throw the error if it's structural (like an invalid API Key) or if we maxed out retries
           throw error;
         }
       }
@@ -93,7 +83,6 @@ async function run() {
 
     const report = responseAi.text.trim();
 
-    // 4. Act on the model's response
     if (report === 'NO_CHANGES') {
       console.log("Gemini confirmed: No substantial updates detected.");
       return;
@@ -101,7 +90,6 @@ async function run() {
 
     console.log("Substantial updates detected! Dispatching Pushover notification...");
 
-    // 5. Fire the alert payload to the phone via Pushover API
     if (process.env.PUSHOVER_USER_KEY && process.env.PUSHOVER_TOKEN) {
       const pushoverResponse = await fetch('https://api.pushover.net/1/messages.json', {
         method: 'POST',
@@ -122,8 +110,6 @@ async function run() {
         const errorText = await pushoverResponse.text();
         console.error(`Pushover delivery failed: ${errorText}`);
       }
-    } else {
-      console.warn("Pushover credentials missing in environment variables. Skipping notification.");
     }
 
   } catch (error) {
