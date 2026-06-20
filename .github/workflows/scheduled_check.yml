@@ -2,15 +2,11 @@ name: Frequent Website Monitor (Arizona Time)
 
 on:
   schedule:
-    # Rule 1: Covers the daytime runs (16:00, 19:00, 22:00 UTC) 
-    # This matches 9:00 AM, 12:00 PM, and 3:00 PM Arizona time
+    # 9:00 AM, 12:00 PM, 3:00 PM Arizona Time
     - cron: '0 16,19,22 * * *'
-    
-    # Rule 2: Covers the evening runs (01:00, 04:00 UTC)
-    # This matches 6:00 PM and 9:00 PM Arizona time
+    # 6:00 PM, 9:00 PM Arizona Time
     - cron: '0 1,4 * * *'
-    
-  workflow_dispatch: # Keeps the manual test button active
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -28,14 +24,12 @@ jobs:
       with:
         node-version: '20'
 
-    - name: Restore Website Cache State
-      id: cache-state
-      uses: actions/cache@v4
+    - name: Download Previous Website State
+      uses: actions/download-artifact@v4
       with:
-        path: last_known_state.txt
-        key: website-state-${{ github.run_id }}
-        restore-keys: |
-          website-state-
+        name: website-baseline-file
+        path: .
+      continue-on-error: true # Safe fallback for the very first run when no artifact exists yet
 
     - name: Install Runtime Dependencies
       run: npm install @google/genai node-fetch
@@ -47,8 +41,10 @@ jobs:
         PUSHOVER_TOKEN: ${{ secrets.PUSHOVER_TOKEN }}
       run: node monitor.js
 
-    - name: Save Updated Website Cache State
-      uses: actions/cache/save@v4
+    - name: Upload New Website State
+      uses: actions/upload-artifact@v4
       with:
+        name: website-baseline-file
         path: last_known_state.txt
-        key: website-state-${{ github.run_id }}
+        retention-days: 3 # Keeps storage clean automatically
+        overwrite: true   # Forces GitHub to completely replace the file with the newest version
